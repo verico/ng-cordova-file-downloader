@@ -1,0 +1,1 @@
+Service for downloading files in Angular/Cordova.
