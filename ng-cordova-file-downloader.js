@@ -176,14 +176,13 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             return deferred.promise;
         };
 
-
-        var downloadFileFromUrl = function(url, dest) {
+        //Downloades
+        var downloadFileFromUrl = function(url, filename) {
             var deferred = $q.defer();
 
             initDownloader().then(function() {
-                checkIfFileExists(dest).then(deferred.resolve, function () {
-                    //startFileDownload(url, fsComponents.fullPath + dest).then(deferred.resolve,deferred.reject );
-                    downloadFile(url, dest, 0).then(deferred.resolve,deferred.reject);
+                checkIfFileExists(filename).then(deferred.resolve, function () {
+                    downloadFile(url, filename, 0).then(deferred.resolve,deferred.reject);
                 });
             });
 
@@ -198,4 +197,38 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             setSaveFolder: setSaveFolderPath,
             downloadFile: downloadFileFromUrl
         };
-    });
+    })
+   .service('fileTransfer', function ($q) {
+        var ft = null;
+
+        var getFileTransferObject = function() {
+            if(ft === null){
+                ft = new FileTransfer();
+            }
+
+            return ft;
+        };
+
+        var getFileSystemObject = function() {
+            var deferred = $q.defer();
+
+            function onSuccess(fs) {
+                deferred.resolve(fs);
+            }
+
+            function onError(error) {
+                deferred.reject(error);
+            }
+
+            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onError);
+
+
+            return deferred.promise;
+        };
+
+
+        return{
+            getFileTransfer: getFileTransferObject,
+            getFileSystem : getFileSystemObject
+        };
+   });
