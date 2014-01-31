@@ -1,5 +1,5 @@
 angular.module('com.verico.ng-cordova-file-downloader', []).
-    service('ngCordovaFileDownloader', function($q, appSettings, fileTransfer) {
+    service('ngCordovaFileDownloader', function($q,$timeout, appSettings, fileTransfer) {
 
         var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
 
@@ -176,7 +176,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             return deferred.promise;
         };
 
-        //Downloades
+
         var downloadFileFromUrl = function(url, filename) {
             var deferred = $q.defer();
 
@@ -189,13 +189,95 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             return deferred.promise;
         };
 
+
         var setSaveFolderPath = function(folder){
             IMAGE_SAVE_FOLDER = folder;
         };
 
+        //----------------------------------------------
+        //--------- FILE LIST DOWNLOAD -----------------
+        //----------------------------------------------
+
+
+        var listDownload = {
+            downloadFileList  : function(files){
+
+                var deferred = $q.defer();
+                var cancel = false;
+                var returned = 0;
+
+                var feedback = {
+                    getCount: function () {
+                        return returned;
+                    },
+                    shouldCancel: function (shouldcancel) {
+                        cancel = shouldcancel;
+                    }
+                };
+
+                var first = listDownload.getNextPart(0, files);
+                var count = first.length;
+
+                var sectionReady = function (countDone) {
+                    $timeout(function () {
+                        if (count < files.length && !cancel) {
+                            var part = listDownload.getNextPart(count, files);
+                            count = count + part.length;
+                            listDownload.downloadFileSection(part).then(sectionReady);
+                        } else {
+                            deferred.resolve();
+                        }
+                    }, 0);
+
+                    returned += countDone;
+                    deferred.notify(feedback);
+                };
+
+                listDownload.downloadFileSection(first).then(sectionReady);
+
+
+                return deferred.promise;
+
+            },
+            getNextPart : function (start, array) {
+                var sectionSize = 10;
+                var part;
+                if (array.length > start + (sectionSize - 1)) {
+                    part = array.slice(start, start + sectionSize);
+                } else {
+                    part = array.slice(start, array.length);
+                }
+                return part;
+            },
+            downloadFileSection : function (files) {
+                var deferred = $q.defer();
+
+                var promises = [];
+
+                _.each(files, function(file) {
+                    var q = downloadFileFromUrl(file);
+                    promises.push(q);
+                });
+
+                var done = function() {
+                    deferred.resolve(promises.length);
+                };
+
+                var doneWithFailed = function(){
+                    console.log('All setteled with fail count:' + promises.length);
+                    deferred.resolve(promises.length);
+                };
+
+                $q.allSettled(promises).then(done, doneWithFailed);
+
+                return deferred.promise;
+            }
+        };
+
         return{
             setSaveFolder: setSaveFolderPath,
-            downloadFile: downloadFileFromUrl
+            downloadFile: downloadFileFromUrl,
+            downloadFileList : listDownload.downloadFileList
         };
     })
    .service('fileTransfer', function ($q) {
@@ -231,4 +313,65 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             getFileTransfer: getFileTransferObject,
             getFileSystem : getFileSystemObject
         };
-   });
+   })
+//----------------------------------------------------------------------------------------------------------------------
+//--------- Credit to "Zenuka" http://stackoverflow.com/questions/18888104/angularjs-q-wait-for-all-even-when-1-rejected
+//----------------------------------------------------------------------------------------------------------------------
+    .config(['$provide', function ($provide) {
+        $provide.decorator('$q', ['$delegate', function ($delegate) {
+            var $q = $delegate;
+
+            // Extention for q
+            $q.allSettled = $q.allSettled || function (promises) {
+                var deferred = $q.defer();
+                if (angular.isArray(promises)) {
+                    var states = [];
+                    var results = [];
+                    var didAPromiseFail = false;
+
+                    // First create an array for all promises with their state
+                    angular.forEach(promises, function (promise, key) {
+                        states[key] = false;
+                    });
+
+                    // Helper to check if all states are finished
+                    var checkStates = function (states, results, deferred, failed) {
+                        var allFinished = true;
+                        angular.forEach(states, function (state, key) {
+                            if (!state) {
+                                allFinished = false;
+                            }
+                        });
+                        if (allFinished) {
+                            if (failed) {
+                                deferred.reject(results);
+                            } else {
+                                deferred.resolve(results);
+                            }
+                        }
+                    };
+
+                    // Loop through the promises
+                    // a second loop to be sure that checkStates is called when all states are set to false first
+                    angular.forEach(promises, function (promise, key) {
+                        $q.when(promise).then(function (result) {
+                            states[key] = true;
+                            results[key] = result;
+                            checkStates(states, results, deferred, didAPromiseFail);
+                        }, function (reason) {
+                            states[key] = true;
+                            results[key] = reason;
+                            didAPromiseFail = true;
+                            checkStates(states, results, deferred, didAPromiseFail);
+                        });
+                    });
+                } else {
+                    throw 'allSettled can only handle an array of promises (for now)';
+                }
+
+                return deferred.promise;
+            };
+
+            return $q;
+        }]);
+    }]);
