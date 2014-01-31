@@ -12,7 +12,7 @@ Dependent on :
 
 Getting Started
 ---------------
-* Clone repository or install with bower (ng-cordova-file-downloader)
+* Install with [Bower][bower]: `$ bower install ng-cordova-file-downloader`
 * Service requires cordova with file and file-transfer plugin installed.
 * Service requires injection of a service 'appSettings' with containing getLoginInfo() function(used for basic auth if needed).
 
@@ -85,3 +85,5 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
         };
     })
 ```
+
+[bower]: http://twitter.github.com/bower/
