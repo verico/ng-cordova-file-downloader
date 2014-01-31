@@ -2,42 +2,50 @@ angular.module('file-downloader-spec',  [ 'com.verico.ng-cordova-file-downloader
 
 describe('fileHandler specs', function() {
 
-    var testObj = {
-        url: 'http://test.com/img1234.jpg',
-        dest: 'img1234_half.jpg',
-        filePath: 'filePath://',
-        downloadedPath: 'filePathLocal://',
-        saveFolder: 'com.verico.file-default/'
-    };
+
+
+    var saveFolder = 'com.verico.ng-cordova-files';
 
     var fileTransferMock;
     var appSettingMock;
     var fileDownloadService;
     var q;
     var timeout;
-    var fileExistsFirstTime = true;
+
+    //Variables used for mock of data
     var dummyFileList;
-    var fileExisting;
-    var noneExistits = false;
+    var downloadedFiles;
+
+
+
+    var fileFactory = function(path){
+        var  retFile = { fullPath: path };
+        retFile.file = function(cb,cbErr){
+            cb({
+                size: 505
+            });
+        };
+        return retFile;
+    };
 
     //Load module
     beforeEach(function() {
         module('file-downloader-spec');
     });
 
-
+    //Mocking of the cordova file transfer api
     beforeEach(function() {
-        fileExisting = [];
+        downloadedFiles = [];
 
         fileTransferMock = {
             getFileTransfer: function() {
                 return {
                     download: function(uri, path, sucsessCallback) {
 
-                        fileExisting.push(path);
 
-                        sucsessCallback({ fullPath: path });
-
+                        var retFile = fileFactory(path);
+                        downloadedFiles.push(retFile);
+                        sucsessCallback(retFile);
                     }
                 };
             },
@@ -45,36 +53,23 @@ describe('fileHandler specs', function() {
                 var fs = {};
                 fs.root = {
                     getFile: function(file, options, callback, errorCallback) {
-                        var  retFile = { fullPath: testObj.filePath + file };
-                            retFile.file = function(cb,cbErr){
-                                cb({
-                                    size: 505
-                                });
 
-                        };
+                        var exists =  _.findWhere(downloadedFiles, {fullPath: file});
 
                         //When file dont exists,
                         if (options.create) {
+                            var retFile = fileFactory(file);
                             callback(retFile);
                         }
-                        else if(_.indexOf(fileExisting,testObj.filePath +  file) != -1){
-                            callback(retFile);
+                        else if(exists){
+                            callback(exists);
                         }
-                        else if (_.indexOf(fileExisting,testObj.filePath +  file) == -1){
+                        else{
                             errorCallback('File do not exists');
-                        }
-                        else {
-                            if(fileExistsFirstTime){
-                                fileExistsFirstTime = false;
-                                errorCallback('error');
-                            }
-                            else {
-                                callback(retFile);
-                            }
                         }
                     },
                     getDirectory: function(dir, options, callback) {
-                        callback(testObj.filePath);
+                        callback(saveFolder);
                     }
                 };
 
@@ -93,6 +88,7 @@ describe('fileHandler specs', function() {
         });
     });
 
+    //Mock of appSetting service
     beforeEach(function(){
         appSettingMock = {
             getLoginInfo : function(){
@@ -104,13 +100,14 @@ describe('fileHandler specs', function() {
         });
     });
 
+    //Injects dependencies into mock variables
     beforeEach(function() {
         //Mock service and controller
-        inject(function(ngCordovaFileDownloader, $q, $timeout) {
+        inject(function($q, $timeout, ngCordovaFileDownloader) {
             q = $q;
             timeout = $timeout;
+            ngCordovaFileDownloader.setSaveFolder(saveFolder);
             fileDownloadService = ngCordovaFileDownloader;
-
         });
     });
 
@@ -118,14 +115,13 @@ describe('fileHandler specs', function() {
         expect(fileDownloadService).not.toEqual(null);
     });
 
-    it('2. Test with existing file- should return Existing file mock', function() {
+    it('2. Test with existing file- should return existing file url', function() {
 
+        var file = fileFactory(saveFolder + '/testFile');
+        downloadedFiles.push(file);
         var retUrl = null;
-
-
-        fileDownloadService.downloadFile(testObj.url, testObj.dest).then(function (url) {
+        fileDownloadService.downloadFile('download/testFile', 'testFile').then(function (url) {
             retUrl = url;
-
         });
 
         timeout.flush();
@@ -134,25 +130,19 @@ describe('fileHandler specs', function() {
         });
 
         runs(function () {
-            expect(retUrl).toEqual(testObj.filePath + testObj.saveFolder + testObj.dest);
+            expect(retUrl).toEqual(file.fullPath);
         });
 
     });
 
 
     it('3. Test with non-existing file', function () {
-        fileExistsFirstTime = false;
-
         var returned = false;
         var retUrl = null;
 
-        var dunmyfile = 'notExisting.jpg';
-        fileDownloadService.downloadFile(testObj.url, dunmyfile).then(function(url) {
+        fileDownloadService.downloadFile('testUrl', 'testFile').then(function(url) {
             returned = true;
             retUrl = url;
-        }, function(err){
-            returned = true;
-
         });
 
         timeout.flush();
@@ -161,36 +151,26 @@ describe('fileHandler specs', function() {
         });
 
         runs(function() {
-            expect(retUrl).toEqual(testObj.filePath + testObj.saveFolder + dunmyfile);
+            expect(downloadedFiles.length).toEqual(1);
+            expect(retUrl).toEqual(downloadedFiles[0].fullPath);
         });
-
-
     });
 
     describe('List download tests', function(){
         beforeEach(function(){
-            noneExistits = true;
             dummyFileList = [];
             for(var i = 0; i < 50; i++){
-                var obj = {
-                  url : 'http://fileUrl?id=' + i,
-                  name : 'file' + i
-                };
-                dummyFileList.push(obj);
+                dummyFileList.push( { url: 'downloadUrl' + i, name: 'testFile' + i});
             }
         });
-
 
         it('4. Should download all files',function(){
             fileDownloadService.downloadFileList(dummyFileList);
             timeout.flush();
-            expect(fileExisting.length).toEqual(dummyFileList.length);
+            expect(downloadedFiles.length).toEqual(dummyFileList.length);
             _.each(dummyFileList, function(file){
-
-                var fileName = testObj.filePath + testObj.saveFolder+  file.name;
-                var f = _.indexOf(fileExisting, fileName);
-
-                expect(f).not.toEqual(-1);
+                var dlFile = _.findWhere(downloadedFiles, {fullPath:saveFolder + '/'+ file.name });
+                expect(dlFile).not.toEqual(undefined);
             });
         });
     });
