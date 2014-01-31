@@ -48,7 +48,6 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
     ngCordovaFileDownloader.downloadFile(downloadUrl, filename).then(dlSucsess,dlFailed);
 
 
-
     //Download array of files
     var dlComplete = function(){
         console.log('Completed download');
@@ -65,16 +64,11 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
         console.log('Some thing happend.');
     };
 
-
-
     var files = [];
     files.push({ url: 'http://mypage.com/myfile1.zip', name : 'myfile1.zip'  });
     files.push({ url: 'http://mypage.com/myfile2.zip', name : 'myfile2.zip'  });
 
-
     ngCordovaFileDownloader.downloadFileList(files).then(dlComplete, dlFailed, updateProgress);
-
-
 };
 
 .service('appSettings', function() {
@@ -84,7 +78,7 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
                 //If basic auth is wanted
                 var encoded =  Base64.encode('username' + ':' + 'password');
                 return 'Basic ' + encoded;
-                
+
                 //Else just return empty
                 // return '';
             }
