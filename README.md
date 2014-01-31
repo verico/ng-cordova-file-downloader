@@ -9,27 +9,6 @@ Dependent on :
 * Underscore
 * Angular
 
-Pseudocode
----------------
-* Check if file exists
-* If exists returns file url.
-
-* Tries to download file
-* If DL succeeded && file downloaded is over 500b
-* Promise.resolve(fileUrl)
-* If DL Failes
-* Retry to download 4 more times
-* Promise.reject()
-
-1. First ordered list item
-2. Another item
-⋅⋅* Unordered sub-list.
-1. Actual numbers don't matter, just that it's a number
-⋅⋅1. Ordered sub-list
-4. And another item.
-
-
-
 
 Getting Started
 ---------------
@@ -52,7 +31,6 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
 
     //Set download folder
     ngCordovaFileDownloader.setSaveFolder('com.verico.myfolder');
-
 
 
     //Download single file
