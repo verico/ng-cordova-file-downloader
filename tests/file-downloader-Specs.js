@@ -17,7 +17,7 @@ describe('fileHandler specs', function() {
     var timeout;
     var fileExistsFirstTime = true;
     var dummyFileList;
-    var fileTransfered;
+    var fileExisting;
     var noneExistits = false;
 
     //Load module
@@ -27,14 +27,14 @@ describe('fileHandler specs', function() {
 
 
     beforeEach(function() {
-        fileTransfered = [];
+        fileExisting = [];
 
         fileTransferMock = {
             getFileTransfer: function() {
                 return {
                     download: function(uri, path, sucsessCallback) {
 
-                        fileTransfered.push(path);
+                        fileExisting.push(path);
 
                         sucsessCallback({ fullPath: path });
 
@@ -57,7 +57,10 @@ describe('fileHandler specs', function() {
                         if (options.create) {
                             callback(retFile);
                         }
-                        else if (noneExistits){
+                        else if(_.indexOf(fileExisting,testObj.filePath +  file) != -1){
+                            callback(retFile);
+                        }
+                        else if (_.indexOf(fileExisting,testObj.filePath +  file) == -1){
                             errorCallback('File do not exists');
                         }
                         else {
@@ -170,8 +173,8 @@ describe('fileHandler specs', function() {
             dummyFileList = [];
             for(var i = 0; i < 50; i++){
                 var obj = {
-                  url : 'http://test.com/url/img?' + i,
-                  name : 'testImage.jpg'
+                  url : 'http://fileUrl?id=' + i,
+                  name : 'file' + i
                 };
                 dummyFileList.push(obj);
             }
@@ -181,7 +184,14 @@ describe('fileHandler specs', function() {
         it('4. Should download all files',function(){
             fileDownloadService.downloadFileList(dummyFileList);
             timeout.flush();
-            expect(fileTransfered.length).toEqual(dummyFileList.length);
+            expect(fileExisting.length).toEqual(dummyFileList.length);
+            _.each(dummyFileList, function(file){
+
+                var fileName = testObj.filePath + testObj.saveFolder+  file.name;
+                var f = _.indexOf(fileExisting, fileName);
+
+                expect(f).not.toEqual(-1);
+            });
         });
     });
 });

@@ -255,7 +255,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
                 var promises = [];
 
                 _.each(files, function(file) {
-                    var q = downloadFileFromUrl(file);
+                    var q = downloadFileFromUrl(file.url, file.name);
                     promises.push(q);
                 });
 
