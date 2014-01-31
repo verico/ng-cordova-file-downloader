@@ -15,8 +15,10 @@ describe('fileHandler specs', function() {
     var fileDownloadService;
     var q;
     var timeout;
-    var rootScope;
     var fileExistsFirstTime = true;
+    var dummyFileList;
+    var fileTransfered;
+    var noneExistits = false;
 
     //Load module
     beforeEach(function() {
@@ -25,13 +27,17 @@ describe('fileHandler specs', function() {
 
 
     beforeEach(function() {
-
+        fileTransfered = [];
 
         fileTransferMock = {
             getFileTransfer: function() {
                 return {
                     download: function(uri, path, sucsessCallback) {
+
+                        fileTransfered.push(path);
+
                         sucsessCallback({ fullPath: path });
+
                     }
                 };
             },
@@ -40,17 +46,21 @@ describe('fileHandler specs', function() {
                 fs.root = {
                     getFile: function(file, options, callback, errorCallback) {
                         var  retFile = { fullPath: testObj.filePath + file };
-                        retFile.file = function(cb,cbErr){
-                            cb({
-                                size: 505
-                            });
+                            retFile.file = function(cb,cbErr){
+                                cb({
+                                    size: 505
+                                });
 
                         };
 
                         //When file dont exists,
                         if (options.create) {
                             callback(retFile);
-                        } else {
+                        }
+                        else if (noneExistits){
+                            errorCallback('File do not exists');
+                        }
+                        else {
                             if(fileExistsFirstTime){
                                 fileExistsFirstTime = false;
                                 errorCallback('error');
@@ -75,7 +85,6 @@ describe('fileHandler specs', function() {
                 return deferred.promise;
             }
         };
-
         module(function($provide) {
             $provide.value('fileTransfer', fileTransferMock);
         });
@@ -92,15 +101,13 @@ describe('fileHandler specs', function() {
         });
     });
 
-
-
     beforeEach(function() {
         //Mock service and controller
-        inject(function(ngCordovaFileDownloader, $q, $timeout, $rootScope) {
+        inject(function(ngCordovaFileDownloader, $q, $timeout) {
             q = $q;
             timeout = $timeout;
             fileDownloadService = ngCordovaFileDownloader;
-            rootScope = $rootScope;
+
         });
     });
 
@@ -155,6 +162,27 @@ describe('fileHandler specs', function() {
         });
 
 
+    });
+
+    describe('List download tests', function(){
+        beforeEach(function(){
+            noneExistits = true;
+            dummyFileList = [];
+            for(var i = 0; i < 50; i++){
+                var obj = {
+                  url : 'http://test.com/url/img?' + i,
+                  name : 'testImage.jpg'
+                };
+                dummyFileList.push(obj);
+            }
+        });
+
+
+        it('4. Should download all files',function(){
+            fileDownloadService.downloadFileList(dummyFileList);
+            timeout.flush();
+            expect(fileTransfered.length).toEqual(dummyFileList.length);
+        });
     });
 });
 

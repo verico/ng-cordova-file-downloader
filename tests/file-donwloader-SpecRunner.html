@@ -1,9 +1,54 @@
-<!DOCTYPE html>
 <html>
 <head>
-    <title></title>
-</head>
-<body>
+    <title>Jasmine Spec Runner- Filedownloader</title>
 
+    <!-- Include standard Jasmine lib -->
+    <link href="../bower_components/jasmine/lib/jasmine-core/jasmine.css" rel="stylesheet"/>
+    <script src="../bower_components/jasmine/lib/jasmine-core/jasmine.js" type="text/javascript"></script>
+    <script src="../bower_components/jasmine/lib/jasmine-core/jasmine-html.js" type="text/javascript"></script>
+
+
+    <!-- include source files here... -->
+    <script type="text/javascript" src="../bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="../bower_components/angular-mocks/angular-mocks.js"></script>
+
+
+    <script type="text/javascript" src="../bower_components/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="../ng-cordova-file-downloader.js"></script>
+
+
+
+    <!-- Spec files  -->
+    <script type="text/javascript" src="file-downloader-Specs.js"></script>
+
+    <script type="text/javascript">
+        (function() {
+            var jasmineEnv = jasmine.getEnv();
+
+            // Register reporters
+            jasmineEnv.addReporter(new jasmine.TrivialReporter()); //< for html
+            jasmineEnv.updateInterval = 1000;
+
+            // Launch test on "window.body.onload"
+            if (window.attachEvent) {
+                window.attachEvent("onload", function() { //< IE
+                    setTimeout(function() {
+                        jasmine.getEnv().execute();
+                    }, 50);
+                });
+            } else {
+                window.addEventListener("load", function() { //< everything else
+                    setTimeout(function() {
+                        jasmine.getEnv().execute();
+                    }, 50);
+                }, false);
+            }
+        })();
+    </script>
+</head>
+
+<body>
 </body>
+
 </html>
+
