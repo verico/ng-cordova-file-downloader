@@ -1,27 +1,25 @@
-
-Angular-Cordova file downloader service
+ng-cordova-file-downloader
 =================
 
-Service for downloading file in Cordova. Uses the cordova file api. Tested on Android and iOS.
+Angular service for downloading file in Cordova. Uses the cordova file api. Tested on Android and iOS.
 Provides methods for downloading single file or an array of files.
 
 Dependent on :
 * Cordova w/file & file-transfer plugin
-* UnderscoreJs
+* Underscore
 * Angular
 
 Pseudocode
 ---------------
 * Check if file exists
-..* If exists returns file url.
+⋅⋅⋅* If exists returns file url.
 
 * Tries to download file
-..* If DL succeeded && file downloaded is over 500b
-....* Promise.resolve(fileUrl)
-..* If DL Failes
-....* Retry to download 4 more times
-....* Promise.reject()
-
+⋅⋅* If DL succeeded && file downloaded is over 500b
+⋅⋅⋅⋅* Promise.resolve(fileUrl)
+⋅⋅* If DL Failes
+⋅⋅⋅⋅* Retry to download 4 more times
+⋅⋅⋅⋅* Promise.reject()
 
 
 
