@@ -14,7 +14,7 @@ Getting Started
 ---------------
 
 * Service requires cordova with file and file-transfer plugin installed.
-* Service requires injection of a service appSettings with containing getLoginInfo() function.
+* Service requires injection of a service 'appSettings' with containing getLoginInfo() function(used for basic auth if needed).
 
 
 
@@ -42,7 +42,7 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
         console.log('Download failed. Oh no!');
     };
 
-    var downloadUrl = 'http://mypage.com/myfile.zip";
+    var downloadUrl = 'http://mypage.com/myfile.zip';
     var filename = 'myfile.zip';
 
     ngCordovaFileDownloader.downloadFile(downloadUrl, filename).then(dlSucsess,dlFailed);
@@ -76,4 +76,18 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
 
 
 };
+
+.service('appSettings', function() {
+
+        return {
+            getLoginInfo: function() {
+                //If basic auth is wanted
+                var encoded =  Base64.encode('username' + ':' + 'password');
+                return 'Basic ' + encoded;
+                
+                //Else just return empty
+                // return '';
+            }
+        };
+    })
 ```
