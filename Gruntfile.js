@@ -44,6 +44,15 @@ module.exports = function(grunt) {
                     'bower install'
                 ].join('&&')
             }
+        },
+        watch: {
+            scripts: {
+                files: ['src/**/*.js'],
+                tasks: ['karma'],
+                options: {
+                    spawn: false
+                }
+            }
         }
     });
 
@@ -54,6 +63,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-ngmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     //Tasks
     grunt.registerTask('install', ['shell:install']);

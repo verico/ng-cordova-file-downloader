@@ -1,19 +1,20 @@
 {
-    "name": "ng-cordova-file-downloader.js",
-    "devDependencies": {
-        "karma": "latest",
-        "phantomjs": "latest",
-        "karma-spec-reporter": "latest",
-        "karma-jasmine": "latest",
-        "karma-phantomjs-launcher": "latest",
-        "karma-coverage" : "latest",
-        "grunt": "latest",
-        "grunt-karma" : "latest",
-        "grunt-shell" : "latest",
-        "grunt-contrib-concat": "latest",
-        "grunt-ngmin" : "latest",
-        "grunt-contrib-uglify" : "latest",
-        "grunt-contrib-clean" : "latest"
-    },
-    "engine": "node 0.10.17"
+  "name": "ng-cordova-file-downloader.js",
+  "devDependencies": {
+    "karma": "latest",
+    "phantomjs": "latest",
+    "karma-spec-reporter": "latest",
+    "karma-jasmine": "latest",
+    "karma-phantomjs-launcher": "latest",
+    "karma-coverage": "latest",
+    "grunt": "latest",
+    "grunt-karma": "latest",
+    "grunt-shell": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-ngmin": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-clean": "latest",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+  "engine": "node 0.10.17"
 }
