@@ -11,7 +11,6 @@ module.exports = function (config) {
         preprocessors : {
             'ng-cordova-file-downloader.js': 'coverage'
         },
-
         // list of files / patterns to load in the browser
         files: [
             //Angular files
@@ -22,8 +21,7 @@ module.exports = function (config) {
             'bower_components/underscore/underscore-min.js',
 
             //Source files
-            'ng-cordova-file-downloader.js',
-
+             'ng-cordova-file-downloader.js',
             //Spec
             'tests/file-downloader-Specs.js'
         ],
