@@ -8,7 +8,12 @@
         "karma-phantomjs-launcher": "latest",
         "karma-coverage" : "latest",
         "grunt": "latest",
-        "grunt-karma" : "latest"
+        "grunt-karma" : "latest",
+        "grunt-shell" : "latest",
+        "grunt-contrib-concat": "latest",
+        "grunt-ngmin" : "latest",
+        "grunt-contrib-uglify" : "latest",
+        "grunt-contrib-clean" : "latest"
     },
     "engine": "node 0.10.17"
 }
