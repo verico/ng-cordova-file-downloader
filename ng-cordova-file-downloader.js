@@ -1,4 +1,71 @@
-angular.module('com.verico.ng-cordova-file-downloader', []).
+angular.module('com.verico.ng-cordova-file-downloader', []);
+
+//----------------------------------------------------------------------------------------------------------------------
+//--------- Credit to "Zenuka" http://stackoverflow.com/questions/18888104/angularjs-q-wait-for-all-even-when-1-rejected
+//----------------------------------------------------------------------------------------------------------------------
+
+
+angular.module('com.verico.ng-cordova-file-downloader')
+    .config(['$provide', function ($provide) {
+        $provide.decorator('$q', ['$delegate', function ($delegate) {
+            var $q = $delegate;
+
+            // Extention for q
+            $q.allSettled = $q.allSettled || function (promises) {
+                var deferred = $q.defer();
+                if (angular.isArray(promises)) {
+                    var states = [];
+                    var results = [];
+                    var didAPromiseFail = false;
+
+                    // First create an array for all promises with their state
+                    angular.forEach(promises, function (promise, key) {
+                        states[key] = false;
+                    });
+
+                    // Helper to check if all states are finished
+                    var checkStates = function (states, results, deferred, failed) {
+                        var allFinished = true;
+                        angular.forEach(states, function (state, key) {
+                            if (!state) {
+                                allFinished = false;
+                            }
+                        });
+                        if (allFinished) {
+                            if (failed) {
+                                deferred.reject(results);
+                            } else {
+                                deferred.resolve(results);
+                            }
+                        }
+                    };
+
+                    // Loop through the promises
+                    // a second loop to be sure that checkStates is called when all states are set to false first
+                    angular.forEach(promises, function (promise, key) {
+                        $q.when(promise).then(function (result) {
+                            states[key] = true;
+                            results[key] = result;
+                            checkStates(states, results, deferred, didAPromiseFail);
+                        }, function (reason) {
+                            states[key] = true;
+                            results[key] = reason;
+                            didAPromiseFail = true;
+                            checkStates(states, results, deferred, didAPromiseFail);
+                        });
+                    });
+                } else {
+                    throw 'allSettled can only handle an array of promises (for now)';
+                }
+
+                return deferred.promise;
+            };
+
+            return $q;
+        }]);
+    }]);
+
+angular.module('com.verico.ng-cordova-file-downloader').
     service('ngCordovaFileDownloader', function($q,$timeout, appSettings, fileTransfer) {
 
         var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
@@ -279,99 +346,39 @@ angular.module('com.verico.ng-cordova-file-downloader', []).
             downloadFile: downloadFileFromUrl,
             downloadFileList : listDownload.downloadFileList
         };
-    })
-   .service('fileTransfer', function ($q) {
-        var ft = null;
+    });
+angular.module('com.verico.ng-cordova-file-downloader').
+    service('fileTransfer', function ($q) {
+    var ft = null;
 
-        var getFileTransferObject = function() {
-            if(ft === null){
-                ft = new FileTransfer();
-            }
+    var getFileTransferObject = function() {
+        if(ft === null){
+            ft = new FileTransfer();
+        }
 
-            return ft;
-        };
+        return ft;
+    };
 
-        var getFileSystemObject = function() {
-            var deferred = $q.defer();
+    var getFileSystemObject = function() {
+        var deferred = $q.defer();
 
-            function onSuccess(fs) {
-                deferred.resolve(fs);
-            }
+        function onSuccess(fs) {
+            deferred.resolve(fs);
+        }
 
-            function onError(error) {
-                deferred.reject(error);
-            }
+        function onError(error) {
+            deferred.reject(error);
+        }
 
-            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onError);
-
-
-            return deferred.promise;
-        };
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onError);
 
 
-        return{
-            getFileTransfer: getFileTransferObject,
-            getFileSystem : getFileSystemObject
-        };
-   })
-//----------------------------------------------------------------------------------------------------------------------
-//--------- Credit to "Zenuka" http://stackoverflow.com/questions/18888104/angularjs-q-wait-for-all-even-when-1-rejected
-//----------------------------------------------------------------------------------------------------------------------
-    .config(['$provide', function ($provide) {
-        $provide.decorator('$q', ['$delegate', function ($delegate) {
-            var $q = $delegate;
+        return deferred.promise;
+    };
 
-            // Extention for q
-            $q.allSettled = $q.allSettled || function (promises) {
-                var deferred = $q.defer();
-                if (angular.isArray(promises)) {
-                    var states = [];
-                    var results = [];
-                    var didAPromiseFail = false;
 
-                    // First create an array for all promises with their state
-                    angular.forEach(promises, function (promise, key) {
-                        states[key] = false;
-                    });
-
-                    // Helper to check if all states are finished
-                    var checkStates = function (states, results, deferred, failed) {
-                        var allFinished = true;
-                        angular.forEach(states, function (state, key) {
-                            if (!state) {
-                                allFinished = false;
-                            }
-                        });
-                        if (allFinished) {
-                            if (failed) {
-                                deferred.reject(results);
-                            } else {
-                                deferred.resolve(results);
-                            }
-                        }
-                    };
-
-                    // Loop through the promises
-                    // a second loop to be sure that checkStates is called when all states are set to false first
-                    angular.forEach(promises, function (promise, key) {
-                        $q.when(promise).then(function (result) {
-                            states[key] = true;
-                            results[key] = result;
-                            checkStates(states, results, deferred, didAPromiseFail);
-                        }, function (reason) {
-                            states[key] = true;
-                            results[key] = reason;
-                            didAPromiseFail = true;
-                            checkStates(states, results, deferred, didAPromiseFail);
-                        });
-                    });
-                } else {
-                    throw 'allSettled can only handle an array of promises (for now)';
-                }
-
-                return deferred.promise;
-            };
-
-            return $q;
-        }]);
-    }]);
+    return{
+        getFileTransfer: getFileTransferObject,
+        getFileSystem : getFileSystemObject
+    };
+})
