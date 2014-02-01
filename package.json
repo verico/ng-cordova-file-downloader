@@ -6,6 +6,7 @@
         "karma-spec-reporter": "latest",
         "karma-jasmine": "latest",
         "karma-phantomjs-launcher": "latest",
+        "karma-coverage" : "latest",
         "grunt": "latest",
         "grunt-karma" : "latest"
     },

@@ -5,7 +5,12 @@ module.exports = function (config) {
         basePath: '',
         // frameworks to use
         frameworks: ['jasmine'],
-        plugins: ['karma-spec-reporter', 'karma-jasmine', 'karma-phantomjs-launcher'],
+        plugins: ['karma-coverage','karma-spec-reporter', 'karma-jasmine', 'karma-phantomjs-launcher'],
+
+
+        preprocessors : {
+            'ng-cordova-file-downloader.js': 'coverage'
+        },
 
         // list of files / patterns to load in the browser
         files: [
@@ -23,7 +28,7 @@ module.exports = function (config) {
             'tests/file-downloader-Specs.js'
         ],
         exclude: [],
-        reporters: ['progress'],
+        reporters: ['progress','coverage'],
         colors: true,
         logLevel: config.LOG_WARN,
         autoWatch: true,
@@ -31,6 +36,11 @@ module.exports = function (config) {
         port: 9876,
         runnerPort: 0,
         captureTimeout: 60000,
-        singleRun: true
+        singleRun: true,
+        coverageReporter : {
+            type : 'html',
+            dir : 'coverage/',
+            file : 'coverage.txt'
+        }
     });
 };
