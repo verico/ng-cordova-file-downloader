@@ -21,7 +21,8 @@ module.exports = function (config) {
             'bower_components/underscore/underscore-min.js',
 
             //Source files
-             'ng-cordova-file-downloader.js',
+            'src/bootstrap.js',
+            'src/**/*.js',
             //Spec
             'tests/file-downloader-Specs.js'
         ],
