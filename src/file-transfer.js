@@ -27,7 +27,6 @@ angular.module('com.verico.ng-cordova-file-downloader').
         return deferred.promise;
     };
 
-
     return{
         getFileTransfer: getFileTransferObject,
         getFileSystem : getFileSystemObject

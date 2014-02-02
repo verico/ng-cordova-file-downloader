@@ -1,5 +1,5 @@
 angular.module('com.verico.ng-cordova-file-downloader').
-    service('ngCordovaFileDownloader', function($q,$timeout, appSettings, fileTransfer) {
+    service('ngCordovaFileDownloader', function($q,$timeout, appSettings, fileTransfer,downloadFeedbackFactory) {
 
         var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
 
@@ -137,7 +137,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
 
                 trys ++;
                 if(!file){
-                    deferred.reject();
+                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
                     return;
                 }
 
@@ -145,16 +145,16 @@ angular.module('com.verico.ng-cordova-file-downloader').
                     deferred.resolve(fullpath);
                 }
                 else if(file.size < 500 && (trys >= maxTrys)){
-                    console.log('getFileSize NOT OK, size: :' +size);
+                    console.log('getFileSize NOT OK, size: :' +file.size);
                     file.remove(function(){
-                        console.log('File removed after failed tryes:' + file.fullPath);
+                        console.log('File removed after failed tryes:' + fullpath);
                     },function(){
-                        console.log('File removed failed:' + file.fullPath);
+                        console.log('File removed failed:' + fullpath);
                     });
-                    deferred.reject();
+                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
                 }
                 else{
-                    console.log('getFileSize NOT OK. Try : ' + trys +  ' size:' +size);
+                    console.log('getFileSize NOT OK. Try : ' + trys +  ' size:' +file.size);
                     downloadFile(url,dest,trys).then(deferred.resolve,deferred.reject);
                 }
             };
@@ -168,10 +168,10 @@ angular.module('com.verico.ng-cordova-file-downloader').
                     });
                 },function(error){
                     console.log('Download file failed: ' + error);
-                    deferred.reject();
+                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
                 });
             }else{
-                deferred.reject();
+                deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
             }
             return deferred.promise;
         };
@@ -263,7 +263,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
                     deferred.resolve(promises.length);
                 };
 
-                var doneWithFailed = function(){
+                var doneWithFailed = function(failed){
                     console.log('All setteled with fail count:' + promises.length);
                     deferred.resolve(promises.length);
                 };
