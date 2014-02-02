@@ -50,7 +50,10 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
 
     //Download array of files
     var dlComplete = function(){
-        console.log('Completed download');
+        console.log('All files done');
+
+        // We can now get url to a specific file using 'downloadFile' method.
+        // Since the file already is download we will receive the url without invoking any more download process
     }
 
     var updateProgress = function(feedback) {
