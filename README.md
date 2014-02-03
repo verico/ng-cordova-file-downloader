@@ -45,8 +45,8 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
 
 
     //Download single file
-    var dlSucsess = function(fileurl){
-        console.log('File downloaded and can be found at ' + fileurl);
+    var dlSucsess = function(summary){
+        console.log('File downloaded and can be found at ' + summary.fullPath);
     };
 
     var dlFailed = function(){
