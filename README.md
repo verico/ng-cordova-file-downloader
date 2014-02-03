@@ -22,7 +22,16 @@ Usage
 ---------------
 
 * All download methods returns an Angular $q promise.
-* When downloading list of files promise returns object containing progress and possibility to cancel.
+* When downloading list of files promise returns notify with progress and possibility to cancel.
+* Both download methods returns a summary object of type :
+    ```javascript
+        {
+            success : bool,
+            url : <requested_url>,
+            name : <request_name>,
+            fullPath : <fullpath to downloaded file>
+        }
+    ```
 
 
 
@@ -49,7 +58,16 @@ function MyCtrl($scope, ngCordovaFileDownloader) {
 
 
     //Download array of files
-    var dlComplete = function(){
+    var dlComplete = function(summary){
+        // summary is [] of summary objects. This can be used to confirm that all files was downloaded succsessfully
+
+        _.each(summary, function(s){
+            console.log(s.success);
+            console.log(s.url);
+            console.log(s.name);
+            console.log(s.fullPath);
+        });
+
         console.log('All files done');
 
         // We can now get url to a specific file using 'downloadFile' method.
