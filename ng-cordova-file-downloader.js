@@ -157,7 +157,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
             var full = IMAGE_SAVE_FOLDER + '/' + dest;
 
             fsComponents.fileSystem.root.getFile(full, { create: false, exclusive: false }, function(file) {
-                deferred.resolve(file.fullPath);
+                deferred.resolve(downloadFeedbackFactory.feedback(true,'',dest, file.fullPath));
             }, function(error) {
                 deferred.reject();
             });
@@ -252,7 +252,6 @@ angular.module('com.verico.ng-cordova-file-downloader').
                         evaluateFileSize();
                     });
                 },function(error){
-                    console.log('Download file failed: ' + error);
                     deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
                 });
             }else{
