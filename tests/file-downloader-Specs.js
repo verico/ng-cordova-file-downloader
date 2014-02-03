@@ -157,14 +157,14 @@ describe('fileHandler specs', function() {
 
         it('3. Test with non-existing file', function () {
             var returned = false;
-            var retUrl = null;
+            var retObj = null;
 
-            fileDownloadService.downloadFile('testUrl', 'testFile').then(function(url) {
+            fileDownloadService.downloadFile('testUrl', 'testFile').then(function(dlSummary) {
                 returned = true;
-                retUrl = url;
+                retObj = dlSummary;
             }, function(url){
                 retUrl = url;
-                returned = true;
+                retObj = dlSummary;
             });
 
             timeout.flush();
@@ -174,7 +174,7 @@ describe('fileHandler specs', function() {
 
             runs(function() {
                 expect(downloadedFiles.length).toEqual(1);
-                expect(retUrl).toEqual(downloadedFiles[0].fullPath);
+                expect(retObj.fullPath).toEqual(downloadedFiles[0].fullPath);
             });
         });
 
@@ -225,9 +225,11 @@ describe('fileHandler specs', function() {
 
         it('4. Should download all files',function(){
             var returned = false;
+            var summary = null;
 
-            fileDownloadService.downloadFileList(dummyFileList).then(function(){
+            fileDownloadService.downloadFileList(dummyFileList).then(function(dlSummary){
                 returned = true;
+                summary = dlSummary;
             });
 
             timeout.flush();
@@ -237,9 +239,14 @@ describe('fileHandler specs', function() {
 
             runs(function() {
                 expect(downloadedFiles.length).toEqual(dummyFileList.length);
+                expect(summary.length).toEqual(dummyFileList.length);
                 _.each(dummyFileList, function(file){
                     var dlFile = _.findWhere(downloadedFiles, {fullPath:saveFolder + '/'+ file.name });
                     expect(dlFile).not.toEqual(undefined);
+                });
+
+                _.each(summary,function(s){
+                    expect(s.success).toEqual(true);
                 });
             });
         });
@@ -254,8 +261,9 @@ describe('fileHandler specs', function() {
                 var returned = false;
                 var dlSummary = null;
 
-                fileDownloadService.downloadFileList(dummyFileList).then(function(dlSummary){
+                fileDownloadService.downloadFileList(dummyFileList).then(function(summary){
                     returned = true;
+                    dlSummary = summary;
                 });
 
                 timeout.flush();
@@ -264,7 +272,7 @@ describe('fileHandler specs', function() {
                 });
 
                 runs(function() {
-                    expect(dlSummary.length).toEqual(dummyFileList);
+                    expect(dlSummary.length).toEqual(dummyFileList.length);
 
                     _.each(dlSummary, function(failed){
                         expect(failed.success).toEqual(false);

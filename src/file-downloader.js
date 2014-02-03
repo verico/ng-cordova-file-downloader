@@ -142,7 +142,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 }
 
                 if(file.size > 500){
-                    deferred.resolve(fullpath);
+                    deferred.resolve(downloadFeedbackFactory.feedback(true,url,dest,fullpath));
                 }
                 else if(file.size < 500 && (trys >= maxTrys)){
                     console.log('getFileSize NOT OK, size: :' +file.size);
@@ -206,6 +206,8 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 var cancel = false;
                 var returned = 0;
 
+                var summary = [];
+
                 var feedback = {
                     getCount: function () {
                         return returned;
@@ -218,18 +220,22 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 var first = listDownload.getNextPart(0, files);
                 var count = first.length;
 
-                var sectionReady = function (countDone) {
-                    $timeout(function () {
-                        if (count < files.length && !cancel) {
-                            var part = listDownload.getNextPart(count, files);
-                            count = count + part.length;
-                            listDownload.downloadFileSection(part).then(sectionReady);
-                        } else {
-                            deferred.resolve();
+                var sectionReady = function (summaries) {
+                    _.each(summaries,function(s){
+                        summary.push(s);
+                    });
+
+                            $timeout(function () {
+                                if (count < files.length && !cancel) {
+                                    var part = listDownload.getNextPart(count, files);
+                                    count = count + part.length;
+                                    listDownload.downloadFileSection(part).then(sectionReady);
+                                } else {
+                            deferred.resolve(summary);
                         }
                     }, 0);
 
-                    returned += countDone;
+                    returned += summaries.length;
                     deferred.notify(feedback);
                 };
 
@@ -259,13 +265,12 @@ angular.module('com.verico.ng-cordova-file-downloader').
                     promises.push(q);
                 });
 
-                var done = function() {
-                    deferred.resolve(promises.length);
+                var done = function(all) {
+                    deferred.resolve(all);
                 };
 
-                var doneWithFailed = function(failed){
-                    console.log('All setteled with fail count:' + promises.length);
-                    deferred.resolve(promises.length);
+                var doneWithFailed = function(all){
+                    deferred.resolve(all);
                 };
 
                 $q.allSettled(promises).then(done, doneWithFailed);

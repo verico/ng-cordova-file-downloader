@@ -7,7 +7,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 success :p_success,
                 url : p_url,
                 name : p_name,
-                fullpath : p_fullpath
+                fullPath : p_fullpath
             };
         };
 
