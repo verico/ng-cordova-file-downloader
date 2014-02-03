@@ -137,20 +137,21 @@ describe('fileHandler specs', function() {
 
         it('2. Test with existing file- should return existing file url', function() {
 
+            var retObj = null;
             var file = fileFactory(saveFolder + '/testFile');
             downloadedFiles.push(file);
             var retUrl = null;
-            fileDownloadService.downloadFile('download/testFile', 'testFile').then(function (url) {
-                retUrl = url;
+            fileDownloadService.downloadFile('download/testFile', 'testFile').then(function (dlSummary) {
+                retObj = dlSummary;
             });
 
             timeout.flush();
             waitsFor(function () {
-                return retUrl != null;
+                return retObj != null;
             });
 
             runs(function () {
-                expect(retUrl).toEqual(file.fullPath);
+                expect(retObj.fullPath).toEqual(file.fullPath);
             });
         });
 
