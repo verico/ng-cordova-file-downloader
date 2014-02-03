@@ -24,14 +24,16 @@ Usage
 * All download methods returns an Angular $q promise.
 * When downloading list of files promise returns notify with progress and possibility to cancel.
 * Both download methods returns a summary object of type :
-    ```javascript
-        {
-            success : bool,
-            url : <requested_url>,
-            name : <request_name>,
-            fullPath : <fullpath to downloaded file>
-        }
-    ```
+```javascript
+
+    {
+        success : bool,
+        url : <requested_url>,
+        name : <request_name>,
+        fullPath : <fullpath to downloaded file>
+    };
+
+```
 
 
 
