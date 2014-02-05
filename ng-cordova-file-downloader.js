@@ -213,52 +213,52 @@ angular.module('com.verico.ng-cordova-file-downloader').
             return deferred.promise;
         };
 
-
-        var downloadFile = function(url, dest, trys){
-            var deferred = $q.defer();
-            var maxTrys = 4;
-
-            var evaluateFileSize = function(fullpath, file){
-
-                trys ++;
-                if(!file){
-                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
-                    return;
-                }
-
-                if(file.size > 500){
-                    deferred.resolve(downloadFeedbackFactory.feedback(true,url,dest,fullpath));
-                }
-                else if(file.size < 500 && (trys >= maxTrys)){
-                    console.log('getFileSize NOT OK, size: :' +file.size);
-                    file.remove(function(){
-                        console.log('File removed after failed tryes:' + fullpath);
-                    },function(){
-                        console.log('File removed failed:' + fullpath);
-                    });
-                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
-                }
-                else{
-                    console.log('getFileSize NOT OK. Try : ' + trys +  ' size:' +file.size);
-                    downloadFile(url,dest,trys).then(deferred.resolve,deferred.reject);
-                }
-            };
-
-            if(trys < maxTrys){
-                startFileDownload(url, fsComponents.fullPath + dest).then(function(fullpath){
-                    getFileSize(dest).then(function(file){
-                        evaluateFileSize(fullpath,file);
-                    }, function(){
-                        evaluateFileSize();
-                    });
-                },function(error){
-                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
-                });
-            }else{
-                deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
-            }
-            return deferred.promise;
-        };
+        //Not in use. This was previos in use b
+//        var downloadFile = function(url, dest, trys){
+//            var deferred = $q.defer();
+//            var maxTrys = 4;
+//
+//            var evaluateFileSize = function(fullpath, file){
+//
+//                trys ++;
+//                if(!file){
+//                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
+//                    return;
+//                }
+//
+//                if(file.size > 500){
+//                    deferred.resolve(downloadFeedbackFactory.feedback(true,url,dest,fullpath));
+//                }
+//                else if(file.size < 500 && (trys >= maxTrys)){
+//                    console.log('getFileSize NOT OK, size: :' +file.size);
+//                    file.remove(function(){
+//                        console.log('File removed after failed tryes:' + fullpath);
+//                    },function(){
+//                        console.log('File removed failed:' + fullpath);
+//                    });
+//                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
+//                }
+//                else{
+//                    console.log('getFileSize NOT OK. Try : ' + trys +  ' size:' +file.size);
+//                    downloadFile(url,dest,trys).then(deferred.resolve,deferred.reject);
+//                }
+//            };
+//
+//            if(trys < maxTrys){
+//                startFileDownload(url, fsComponents.fullPath + dest).then(function(fullpath){
+//                    getFileSize(dest).then(function(file){
+//                        evaluateFileSize(fullpath,file);
+//                    }, function(){
+//                        evaluateFileSize();
+//                    });
+//                },function(error){
+//                    deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
+//                });
+//            }else{
+//                deferred.reject(downloadFeedbackFactory.feedback(false,url,dest));
+//            }
+//            return deferred.promise;
+//        };
 
 
         var downloadFileFromUrl = function(url, filename) {
@@ -266,7 +266,11 @@ angular.module('com.verico.ng-cordova-file-downloader').
 
             initDownloader().then(function() {
                 checkIfFileExists(filename).then(deferred.resolve, function () {
-                    downloadFile(url, filename, 0).then(deferred.resolve,deferred.reject);
+                    startFileDownload(url, fsComponents.fullPath + filename).then(function(fullpath){
+                        deferred.resolve(downloadFeedbackFactory.feedback(true,url,filename,fullpath));
+                    },function(error){
+                        deferred.reject(downloadFeedbackFactory.feedback(false,url,filename));
+                    });
                 });
             });
 
