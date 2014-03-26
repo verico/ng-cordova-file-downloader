@@ -1,9 +1,6 @@
 angular.module('file-downloader-spec',  [ 'com.verico.ng-cordova-file-downloader' ]);
 
 describe('fileHandler specs', function() {
-
-
-
     var saveFolder = 'com.verico.ng-cordova-files';
 
     var fileTransferMock;
@@ -70,9 +67,13 @@ describe('fileHandler specs', function() {
                 var fs = {};
                 fs.root = {
                     getFile: function(file, options, callback, errorCallback) {
-
-                        var exists =  _.findWhere(downloadedFiles, {fullPath: file});
-
+                        var exists = false;
+                        for(var i = 0; i < downloadedFiles.length; i++){
+                            if(downloadedFiles[i].fullPath == file){
+                                exists = downloadedFiles[i];
+                                break;
+                            }
+                        }
                         //When file dont exists,
                         if (options.create) {
                             var retFile = fileFactory(file);
@@ -135,48 +136,25 @@ describe('fileHandler specs', function() {
 
     describe('Single file download',function(){
 
-        it('2. Test with existing file- should return existing file url', function() {
-
-            var retObj = null;
+        it('2. Test with existing file- should return existing file url', function(done) {
             var file = fileFactory(saveFolder + '/testFile');
             downloadedFiles.push(file);
-            var retUrl = null;
             fileDownloadService.downloadFile('download/testFile', 'testFile').then(function (dlSummary) {
-                retObj = dlSummary;
+                expect(dlSummary.fullPath).toEqual(file.fullPath);
+                done();
             });
-
             timeout.flush();
-            waitsFor(function () {
-                return retObj != null;
-            });
-
-            runs(function () {
-                expect(retObj.fullPath).toEqual(file.fullPath);
-            });
         });
 
 
-        it('3. Test with non-existing file', function () {
-            var returned = false;
-            var retObj = null;
-
+        it('3. Test with non-existing file', function (done) {
             fileDownloadService.downloadFile('testUrl', 'testFile').then(function(dlSummary) {
-                returned = true;
-                retObj = dlSummary;
-            }, function(url){
-                retUrl = url;
-                retObj = dlSummary;
+                expect(downloadedFiles.length).toEqual(1);
+                expect(dlSummary.fullPath).toEqual(downloadedFiles[0].fullPath);
+                done();
             });
 
             timeout.flush();
-            waitsFor(function() {
-                return returned;
-            });
-
-            runs(function() {
-                expect(downloadedFiles.length).toEqual(1);
-                expect(retObj.fullPath).toEqual(downloadedFiles[0].fullPath);
-            });
         });
 
         describe('File download failed',function(){
@@ -185,27 +163,14 @@ describe('fileHandler specs', function() {
                 downloadShouldFail = true;
             });
 
-
-            it('Download single file',function(){
-                var returned = false;
-                var failObj = null;
-
+            it('Download single file',function(done){
                 fileDownloadService.downloadFile('testUrl', 'testFile').then(function(url) {
-                    returned = true;
-
+                    expect("If file this happens somehting is wrong").toEqual(false);
                 },function(p_failObj){
-                    returned = true;
-                    failObj = p_failObj;
+                    expect(p_failObj.success).toEqual(false);
+                    done();
                 });
-
                 timeout.flush();
-                waitsFor(function() {
-                    return returned;
-                });
-
-                runs(function() {
-                    expect(failObj.success).toEqual(false);
-                });
             });
         });
 
@@ -224,32 +189,29 @@ describe('fileHandler specs', function() {
             }
         });
 
-        it('4. Should download all files',function(){
-            var returned = false;
-            var summary = null;
+        it('4. Should download all files',function(done){
 
             fileDownloadService.downloadFileList(dummyFileList).then(function(dlSummary){
-                returned = true;
-                summary = dlSummary;
+                expect(downloadedFiles.length).toEqual(dummyFileList.length);
+                expect(dlSummary.length).toEqual(dummyFileList.length);
+                angular.forEach(dummyFileList, function(file){
+                    var dlFile = undefined;
+                    for(var i = 0; i < downloadedFiles.length; i++){
+                        if(downloadedFiles[i].fullPath == saveFolder + '/'+ file.name){
+                            dlFile = downloadedFiles[i];
+                            break;
+                        }
+                    }
+                    expect(dlFile).not.toEqual(undefined);
+                });
+                angular.forEach(dlSummary,function(s){
+                    expect(s.success).toEqual(true);
+                });
+
+                done();
             });
 
             timeout.flush();
-            waitsFor(function() {
-                return returned;
-            });
-
-            runs(function() {
-                expect(downloadedFiles.length).toEqual(dummyFileList.length);
-                expect(summary.length).toEqual(dummyFileList.length);
-                _.each(dummyFileList, function(file){
-                    var dlFile = _.findWhere(downloadedFiles, {fullPath:saveFolder + '/'+ file.name });
-                    expect(dlFile).not.toEqual(undefined);
-                });
-
-                _.each(summary,function(s){
-                    expect(s.success).toEqual(true);
-                });
-            });
         });
 
         describe('List download failed',function(){
@@ -258,28 +220,18 @@ describe('fileHandler specs', function() {
                 downloadShouldFail = true;
             });
 
-            it('Download list fail, should return objects of all failed',function(){
-                var returned = false;
-                var dlSummary = null;
+            it('Download list fail, should return objects of all failed',function(done){
 
                 fileDownloadService.downloadFileList(dummyFileList).then(function(summary){
-                    returned = true;
-                    dlSummary = summary;
-                });
-
-                timeout.flush();
-                waitsFor(function() {
-                    return returned;
-                });
-
-                runs(function() {
-                    expect(dlSummary.length).toEqual(dummyFileList.length);
-
-                    _.each(dlSummary, function(failed){
+                    expect(summary.length).toEqual(dummyFileList.length);
+                    angular.forEach(summary, function(failed){
                         expect(failed.success).toEqual(false);
                     });
 
+                    done();
                 });
+                timeout.flush();
+
             });
         });
     });
