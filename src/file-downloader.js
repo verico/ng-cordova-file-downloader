@@ -224,7 +224,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 var count = first.length;
 
                 var sectionReady = function (summaries) {
-                    _.each(summaries,function(s){
+                    angular.forEach(summaries,function(s){
                         summary.push(s);
                     });
 
@@ -263,7 +263,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
 
                 var promises = [];
 
-                _.each(files, function(file) {
+                angular.forEach(files, function(file) {
                     var q = downloadFileFromUrl(file.url, file.name);
                     promises.push(q);
                 });

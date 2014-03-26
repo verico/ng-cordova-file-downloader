@@ -11,8 +11,7 @@
   ],
   "dependencies": {
     "angular": "1.2.15",
-    "angular-mocks": "1.2.15",
-    "underscore": "32216a4afe97c0c3665897b58be73409d5571dcf"
+    "angular-mocks": "1.2.15"
   },
   "devDependencies": {
     "jasmine": "2.0.0"

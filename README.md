@@ -6,7 +6,6 @@ Provides methods for downloading single file or an array of files.
 
 Dependent on :
 * Cordova w/file & file-transfer plugin
-* Underscore
 * Angular
 
 
