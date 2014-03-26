@@ -2,7 +2,9 @@ angular.module('com.verico.ng-cordova-file-downloader').
     service('fileTransfer', function ($q) {
     var ft = null;
 
-    var getFileTransferObject = function() {
+    var _public = {};
+
+        _public.getFileTransfer = function() {
         if(ft === null){
             ft = new FileTransfer();
         }
@@ -10,7 +12,7 @@ angular.module('com.verico.ng-cordova-file-downloader').
         return ft;
     };
 
-    var getFileSystemObject = function() {
+        _public.getFileSystem = function() {
         var deferred = $q.defer();
 
         function onSuccess(fs) {
@@ -27,8 +29,5 @@ angular.module('com.verico.ng-cordova-file-downloader').
         return deferred.promise;
     };
 
-    return{
-        getFileTransfer: getFileTransferObject,
-        getFileSystem : getFileSystemObject
-    };
-})
+    return _public;
+});
