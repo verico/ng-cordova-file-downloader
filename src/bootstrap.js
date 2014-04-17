@@ -1,0 +1,1 @@
+angular.module('com.verico.ng-cordova-file-downloader', []);

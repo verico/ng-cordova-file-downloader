@@ -1,0 +1,20 @@
+{
+  "name": "ng-cordova-file-downloader",
+  "version": "0.0.2",
+  "main": "./ng-cordova-file-downloader.js",
+  "ignore": [
+    "README.md",
+    ".gitignore",
+    "package.json",
+    "karma.config.js",
+    "Gruntfile.js"
+  ],
+  "dependencies": {
+    "angular": "1.2.15",
+    "angular-mocks": "1.2.15"
+  },
+  "devDependencies": {
+    "jasmine": "2.0.0"
+  },
+  "description": "Angular-Cordova file-downloader service"
+}
