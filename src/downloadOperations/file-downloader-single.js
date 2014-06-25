@@ -27,7 +27,11 @@ angular.module('com.verico.ng-cordova-file-downloader').
                    uri,
                    path,
                    function(entry) {
-                       deferred.resolve(entry.fullPath);
+                       if (typeof entry.toURL == 'function') {
+                           deferred.resolve(entry.toURL());
+                       }else{
+                           deferred.resolve(entry.fullPath);
+                       }
                    },
                    function(error) {
                        deferred.reject('Image download failed:' + JSON.stringify(error));
