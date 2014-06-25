@@ -53,7 +53,15 @@ angular.module('com.verico.ng-cordova-file-downloader').
                 _private.createFolder(IMAGE_SAVE_FOLDER).then(function(dir) {
                     var dummyFile = dir + "/dummy.html";
                     fsComponents.fileSystem.root.getFile(dummyFile, { create: true, exclusive: false }, function(file) {
-                        fsComponents.fullPath = file.fullPath.replace("dummy.html", "");
+
+                        var path;
+                        if (typeof file.toURL == 'function') {
+                            path = file.toURL().replace("dummy.html", "");
+                        }else{
+                           path =  file.fullPath.replace("dummy.html", "");
+                        }
+
+                        fsComponents.fullPath = path;
                         deferred.resolve(fsComponents.fullPath);
 
                     }, _private.onError);
@@ -77,7 +85,15 @@ angular.module('com.verico.ng-cordova-file-downloader').
               var deferred = $q.defer();
               var full = IMAGE_SAVE_FOLDER + '/' + dest;
               fsComponents.fileSystem.root.getFile(full, { create: false, exclusive: false }, function(file) {
-                  deferred.resolve(downloadFeedbackFactory.feedback(true,'',dest, file.fullPath));
+
+                  var path;
+                  if (typeof file.toURL == 'function') {
+                      path = file.toURL();
+                  }else{
+                      path =  file.fullPath;
+                  }
+
+                  deferred.resolve(downloadFeedbackFactory.feedback(true,'',dest, path));
               }, function(error) {
                   deferred.reject();
               });
@@ -95,7 +111,6 @@ angular.module('com.verico.ng-cordova-file-downloader').
         _public.setSaveFolderPath = function(folder){
             IMAGE_SAVE_FOLDER = folder;
         };
-
 
         return _public;
     });
