@@ -1,5 +1,5 @@
 angular.module('com.verico.ng-cordova-file-downloader').
-    service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle,  fileTransfer,downloadFeedbackFactory) {
+    service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
         var _public = {};
         var _private ={};
 
@@ -45,8 +45,6 @@ angular.module('com.verico.ng-cordova-file-downloader').
             return deferred.promise;
 
         };
-
-
 
 
         _private.getNextPart = function (start, array) {

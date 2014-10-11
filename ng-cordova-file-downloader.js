@@ -1,6 +1,6 @@
 angular.module('com.verico.ng-cordova-file-downloader', []);
 angular.module('com.verico.ng-cordova-file-downloader').
-    service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle,  fileTransfer,downloadFeedbackFactory) {
+    service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
         var _public = {};
         var _private ={};
 
@@ -48,8 +48,6 @@ angular.module('com.verico.ng-cordova-file-downloader').
         };
 
 
-
-
         _private.getNextPart = function (start, array) {
                 var sectionSize = 10;
                 var part;
@@ -93,6 +91,13 @@ angular.module('com.verico.ng-cordova-file-downloader').
 
         _public.setSaveFolderPath = downloadFileSystemHelper.setSaveFolderPath;
 
+
+        /*
+        * Downloads a single file.
+        *
+        *
+        *
+        * */
         _private.startFileDownload = function(url, filename) {
            var deferred = $q.defer();
 
@@ -133,11 +138,17 @@ angular.module('com.verico.ng-cordova-file-downloader').
 
 
 
-
-
             return deferred.promise;
         };
 
+
+        /*
+        *
+        * Tries to download a file for a given url and filename.
+        * If file already exists it returns without downloading the corresponding file.
+        * Returns an object from 'downloadFeedbackFactory'
+        *
+         */
         _public.downloadFileFromUrl = function(url, filename) {
             var deferred = $q.defer();
 
