@@ -101,6 +101,8 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
 
                     var authHeader = {};
 
+                    var currentTimeout;
+
                     if(appSettings){
                         authHeader = {
                             "Authorization": appSettings.getLoginInfo()
@@ -110,11 +112,17 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                         uri,
                         path,
                         function(entry) {
+                            if(currentTimeout){
+                                $timeout.cancel(currentTimeout);
+                            }
+
                             if (typeof entry.toURL == 'function') {
                                 deferred.resolve(entry.toURL());
                             }else{
                                 deferred.resolve(entry.fullPath);
                             }
+
+
                         },
                         function(error) {
                             deferred.reject('Image download failed:' + JSON.stringify(error));
@@ -127,7 +135,8 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
 
 
                     if (options && options.timeout !== undefined && options.timeout !== null) {
-                        $timeout(function () {
+                        currentTimeout = $timeout(function () {
+                            console.log('Download timed out. Stppping filetransfer');
                             ft.abort();
                             deferred.reject('Image download timeout : ' + url);
                         }, options.timeout);
