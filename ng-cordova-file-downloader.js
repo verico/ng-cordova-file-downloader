@@ -17,12 +17,12 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                 return part;
             }
 
-            function downloadFileSection (files) {
+            function downloadFileSection (files,options) {
                 var deferred = $q.defer();
                 var promises = [];
 
                 files.forEach(function(file) {
-                    var q = fileDownloaderSingle.downloadFileFromUrl(file.url, file.name);
+                    var q = fileDownloaderSingle.downloadFileFromUrl(file.url, file.name,options);
                     promises.push(q);
                 });
 
@@ -35,7 +35,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
             }
 
             return {
-                downloadFileList : function(files){
+                downloadFileList : function(files, options){
                     var deferred = $q.defer();
                     var cancel = false;
                     var returned = 0;
@@ -62,7 +62,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                             if (count < files.length && !cancel) {
                                 var part = getNextPart(count, files);
                                 count = count + part.length;
-                                downloadFileSection(part).then(sectionReady);
+                                downloadFileSection(part,options).then(sectionReady);
                             } else {
                                 deferred.resolve(summary);
                             }
@@ -72,7 +72,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                         deferred.notify(feedback);
                     }
 
-                    downloadFileSection(first).then(sectionReady);
+                    downloadFileSection(first,options).then(sectionReady);
                     return deferred.promise;
                 }
             };
@@ -91,7 +91,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
              * Downloads a single file.
              *
              * */
-            function startFileDownload(url, filename) {
+            function startFileDownload(url, filename, options) {
                 var deferred = $q.defer();
                 downloadFileSystemHelper.getFullFilePath().then(function(folderPath){
                     var path = folderPath + filename;
@@ -125,6 +125,15 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                         }
                     );
 
+
+                    if (options && options.timeout !== undefined && options.timeout !== null) {
+                        $timeout(function () {
+                            ft.abort();
+                            deferred.reject('Image download timeout : ' + url);
+                        }, options.timeout);
+                        options.timeout = null;
+                    }
+
                 }, deferred.reject);
 
                 return deferred.promise;
@@ -138,10 +147,10 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
              * Returns an object from 'downloadFeedbackFactory'
              *
              */
-            function downloadFileFromUrl(url, filename) {
+            function downloadFileFromUrl(url, filename, options) {
                 var deferred = $q.defer();
                 downloadFileSystemHelper.checkIfFileExists(filename).then(deferred.resolve, function () {
-                    startFileDownload(url, filename).then(function(fullpath){
+                    startFileDownload(url, filename, options).then(function(fullpath){
                         deferred.resolve(downloadFeedbackFactory.feedback(true,url,filename,fullpath));
                     },function(error){
                         deferred.reject(downloadFeedbackFactory.feedback(false,url,filename));

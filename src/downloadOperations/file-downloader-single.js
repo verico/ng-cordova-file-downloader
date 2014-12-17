@@ -11,7 +11,7 @@
              * Downloads a single file.
              *
              * */
-            function startFileDownload(url, filename) {
+            function startFileDownload(url, filename, options) {
                 var deferred = $q.defer();
                 downloadFileSystemHelper.getFullFilePath().then(function(folderPath){
                     var path = folderPath + filename;
@@ -45,6 +45,15 @@
                         }
                     );
 
+
+                    if (options && options.timeout !== undefined && options.timeout !== null) {
+                        $timeout(function () {
+                            ft.abort();
+                            deferred.reject('Image download timeout : ' + url);
+                        }, options.timeout);
+                        options.timeout = null;
+                    }
+
                 }, deferred.reject);
 
                 return deferred.promise;
@@ -58,10 +67,10 @@
              * Returns an object from 'downloadFeedbackFactory'
              *
              */
-            function downloadFileFromUrl(url, filename) {
+            function downloadFileFromUrl(url, filename, options) {
                 var deferred = $q.defer();
                 downloadFileSystemHelper.checkIfFileExists(filename).then(deferred.resolve, function () {
-                    startFileDownload(url, filename).then(function(fullpath){
+                    startFileDownload(url, filename, options).then(function(fullpath){
                         deferred.resolve(downloadFeedbackFactory.feedback(true,url,filename,fullpath));
                     },function(error){
                         deferred.reject(downloadFeedbackFactory.feedback(false,url,filename));

@@ -16,12 +16,12 @@
                 return part;
             }
 
-            function downloadFileSection (files) {
+            function downloadFileSection (files,options) {
                 var deferred = $q.defer();
                 var promises = [];
 
                 files.forEach(function(file) {
-                    var q = fileDownloaderSingle.downloadFileFromUrl(file.url, file.name);
+                    var q = fileDownloaderSingle.downloadFileFromUrl(file.url, file.name,options);
                     promises.push(q);
                 });
 
@@ -34,7 +34,7 @@
             }
 
             return {
-                downloadFileList : function(files){
+                downloadFileList : function(files, options){
                     var deferred = $q.defer();
                     var cancel = false;
                     var returned = 0;
@@ -61,7 +61,7 @@
                             if (count < files.length && !cancel) {
                                 var part = getNextPart(count, files);
                                 count = count + part.length;
-                                downloadFileSection(part).then(sectionReady);
+                                downloadFileSection(part,options).then(sectionReady);
                             } else {
                                 deferred.resolve(summary);
                             }
@@ -71,7 +71,7 @@
                         deferred.notify(feedback);
                     }
 
-                    downloadFileSection(first).then(sectionReady);
+                    downloadFileSection(first,options).then(sectionReady);
                     return deferred.promise;
                 }
             };
