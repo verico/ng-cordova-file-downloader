@@ -1,17 +1,20 @@
-angular.module('com.verico.ng-cordova-file-downloader').
-    service('downloadFeedbackFactory', function() {
+(function() {
+    "use strict";
 
-        var getFeedback = function(p_success, p_url, p_name, p_fullpath){
+    angular.module('com.verico.ng-cordova-file-downloader').
+        service('downloadFeedbackFactory', function () {
+
 
             return {
-                success :p_success,
-                url : p_url,
-                name : p_name,
-                fullPath : p_fullpath
-            };
-        };
+                feedback: function (p_success, p_url, p_name, p_fullpath) {
 
-        return {
-            feedback : getFeedback
-        }
-    });
+                    return {
+                        success: p_success,
+                        url: p_url,
+                        name: p_name,
+                        fullPath: p_fullpath
+                    };
+                }
+            };
+        });
+})();

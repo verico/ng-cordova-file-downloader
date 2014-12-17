@@ -1,116 +1,97 @@
-angular.module('com.verico.ng-cordova-file-downloader').
-    service('downloadFileSystemHelper', function($q,$timeout, appSettings, fileTransfer,downloadFeedbackFactory) {
-        var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
+(function(){
+    "use strict";
 
-        var fsComponents = {
-            fullPath: null,
-            fileSystem: null,
-            downloadUrl: null,
-            currentFile: null
-        };
+    angular.module('com.verico.ng-cordova-file-downloader').
+        service('downloadFileSystemHelper', function($q,$timeout, appSettings, fileTransferService,downloadFeedbackFactory) {
+            var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
+            var fullPath = null;
 
-        var _public = {};
-        var _private = {};
-
-
-
-        _private.onError = function(error) {
-            console.log('Error:' + JSON.stringify(error));
-        };
-
-
-        _private.createFolder = function(folder) {
-            var deferred = $q.defer();
-
-            function finished(dir) {
-                deferred.resolve(folder);
+            function onError(error) {
+                console.log('Error:' + JSON.stringify(error));
             }
 
-            fsComponents.fileSystem.root.getDirectory(folder, { create: true, exclusive: false }, finished, _private.onError);
-
-            return deferred.promise;
-        };
-
-        _private.getFileSystem = function() {
-            var deferred = $q.defer();
-            if (fsComponents.fileSystem === null) {
-                fileTransfer.getFileSystem().then(function (fs) {
-                    fsComponents.fileSystem = fs;
-                    deferred.resolve();
+            function createFolder(folder) {
+                var deferred = $q.defer();
+                fileTransferService.getFileSystem().then(function (fs){
+                    fs.root.getDirectory(folder,
+                        {
+                            create: true,
+                            exclusive: false
+                        },
+                        function() {
+                            deferred.resolve(folder);
+                        }, function(err){
+                            onError(err);
+                            deferred.reject(err);
+                        });
+                },function(err){
+                    onError(err);
+                    deferred.reject(err);
                 });
 
-            } else {
-                deferred.resolve();
+                return deferred.promise;
             }
 
-            return deferred.promise;
-        };
+            function getFullFilePath() {
+                var deferred = $q.defer();
 
-        _public.getFullFilePath = function() {
-            var deferred = $q.defer();
+                if (fullPath === null) {
+                    createFolder(IMAGE_SAVE_FOLDER).then(function(dir) {
+                        fileTransferService.getFileSystem().then(function (fs){
+                            var dummyFile = dir + "/dummy.html";
+                            fs.root.getFile(dummyFile, { create: true, exclusive: false }, function(file) {
+                                if (typeof file.toURL == 'function') {
+                                    fullPath = file.toURL().replace("dummy.html", "");
+                                }else{
+                                    fullPath =  file.fullPath.replace("dummy.html", "");
+                                }
+                                deferred.resolve(fullPath);
 
-            if (fsComponents.fullPath === null) {
-                _private.createFolder(IMAGE_SAVE_FOLDER).then(function(dir) {
-                    var dummyFile = dir + "/dummy.html";
-                    fsComponents.fileSystem.root.getFile(dummyFile, { create: true, exclusive: false }, function(file) {
+                            }, onError);
+                        });
+                    });
+                } else {
+                    deferred.resolve(fullPath);
+                }
+                return deferred.promise;
+            }
 
+            // DESCRIPTION:
+            // Checks if file exists. Since we need to create a dummyfile to obtaine full path we checks if file exists first.
+            // This we can check without full path, and then we can spare one operation.
+            // RETURNS promise:
+            // Resolved:  Returns full url to file
+            // Reject : Returns fullpath to basefolder
+            function checkIfFileExists(dest) {
+
+                return  fileTransferService.getFileSystem().then(function (fs) {
+                    var deferred = $q.defer();
+                    var full = IMAGE_SAVE_FOLDER + '/' + dest;
+                    fs.root.getFile(full, { create: false, exclusive: false }, function(file) {
                         var path;
                         if (typeof file.toURL == 'function') {
-                            path = file.toURL().replace("dummy.html", "");
+                            path = file.toURL();
                         }else{
-                           path =  file.fullPath.replace("dummy.html", "");
+                            path =  file.fullPath;
                         }
+                        deferred.resolve(downloadFeedbackFactory.feedback(true,'',dest, path));
 
-                        fsComponents.fullPath = path;
-                        deferred.resolve(fsComponents.fullPath);
-
-                    }, _private.onError);
+                    },deferred.reject);
+                    return deferred.promise;
                 });
-            } else {
-                deferred.resolve(fsComponents.fullPath);
             }
-            return deferred.promise;
-        };
 
-        // DESCRIPTION:
-        // Checks if file exists. Since we need to create a dummyfile to obtaine full path we checks if file exists first.
-        // This we can check without full path, and then we can spare one operation.
-        // RETURNS promise:
-        // Resolved:  Returns full url to file
-        // Reject : Returns fullpath to basefolder
-        _public.checkIfFileExists = function(dest) {
+            function setSaveFolderPath(folder){
+                IMAGE_SAVE_FOLDER = folder;
+            }
 
-          return _private.initDownloader().then(function(){
+            return {
+                checkIfFileExists : checkIfFileExists,
+                setSaveFolderPath : setSaveFolderPath,
+                getFullFilePath : getFullFilePath
 
-              var deferred = $q.defer();
-              var full = IMAGE_SAVE_FOLDER + '/' + dest;
-              fsComponents.fileSystem.root.getFile(full, { create: false, exclusive: false }, function(file) {
+            };
+        });
 
-                  var path;
-                  if (typeof file.toURL == 'function') {
-                      path = file.toURL();
-                  }else{
-                      path =  file.fullPath;
-                  }
+})();
 
-                  deferred.resolve(downloadFeedbackFactory.feedback(true,'',dest, path));
-              }, function(error) {
-                  deferred.reject();
-              });
-
-              return deferred.promise;
-          })
-
-
-        };
-
-        _private.initDownloader = function () {
-            return _private.getFileSystem();
-        };
-
-        _public.setSaveFolderPath = function(folder){
-            IMAGE_SAVE_FOLDER = folder;
-        };
-
-        return _public;
-    });

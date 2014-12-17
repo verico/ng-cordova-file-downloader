@@ -1,53 +1,11 @@
-angular.module('com.verico.ng-cordova-file-downloader').
-    service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
-        var _public = {};
-        var _private ={};
+(function() {
+    "use strict";
 
-        _public. downloadFileList  = function(files){
-            var deferred = $q.defer();
-            var cancel = false;
-            var returned = 0;
-
-            var summary = [];
-
-            var feedback = {
-                getCount: function () {
-                    return returned;
-                },
-                shouldCancel: function (shouldcancel) {
-                    cancel = shouldcancel;
-                }
-            };
-
-            var first = _private.getNextPart(0, files);
-            var count = first.length;
-
-            var sectionReady = function (summaries) {
-                angular.forEach(summaries,function(s){
-                    summary.push(s);
-                });
-
-                $timeout(function () {
-                    if (count < files.length && !cancel) {
-                        var part = _private.getNextPart(count, files);
-                        count = count + part.length;
-                        _private.downloadFileSection(part).then(sectionReady);
-                    } else {
-                        deferred.resolve(summary);
-                    }
-                }, 0);
-
-                returned += summaries.length;
-                deferred.notify(feedback);
-            };
-
-            _private.downloadFileSection(first).then(sectionReady);
-            return deferred.promise;
-
-        };
+    angular.module('com.verico.ng-cordova-file-downloader').
+        service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
 
 
-        _private.getNextPart = function (start, array) {
+            function getNextPart(start, array) {
                 var sectionSize = 10;
                 var part;
                 if (array.length > start + (sectionSize - 1)) {
@@ -56,29 +14,67 @@ angular.module('com.verico.ng-cordova-file-downloader').
                     part = array.slice(start, array.length);
                 }
                 return part;
-            };
-        _private.downloadFileSection = function (files) {
-                var deferred = $q.defer();
+            }
 
+            function downloadFileSection (files) {
+                var deferred = $q.defer();
                 var promises = [];
 
-                angular.forEach(files, function(file) {
+                files.forEach(function(file) {
                     var q = fileDownloaderSingle.downloadFileFromUrl(file.url, file.name);
                     promises.push(q);
                 });
 
-                var done = function(all) {
+                function done(all) {
                     deferred.resolve(all);
-                };
+                }
 
-                var doneWithFailed = function(all){
-                    deferred.resolve(all);
-                };
-
-                $q.allSettled(promises).then(done, doneWithFailed);
+                $q.allSettled(promises).then(done,done);
 
                 return deferred.promise;
-            };
+            }
 
-        return _public;
-    });
+            return {
+                downloadFileList : function(files){
+                    var deferred = $q.defer();
+                    var cancel = false;
+                    var returned = 0;
+                    var summary = [];
+
+                    var feedback = {
+                        getCount: function () {
+                            return returned;
+                        },
+                        shouldCancel: function (shouldcancel) {
+                            cancel = shouldcancel;
+                        }
+                    };
+
+                    var first = getNextPart(0, files);
+                    var count = first.length;
+
+                    function sectionReady(summaries) {
+                        summaries.forEach(function(s){
+                            summary.push(s);
+                        });
+
+                        $timeout(function () {
+                            if (count < files.length && !cancel) {
+                                var part = getNextPart(count, files);
+                                count = count + part.length;
+                                downloadFileSection(part).then(sectionReady);
+                            } else {
+                                deferred.resolve(summary);
+                            }
+                        }, 0);
+
+                        returned += summaries.length;
+                        deferred.notify(feedback);
+                    }
+
+                    downloadFileSection(first).then(sectionReady);
+                    return deferred.promise;
+                }
+            };
+        });
+})();

@@ -8,6 +8,7 @@ describe('fileHandler specs', function() {
     var fileDownloadService;
     var q;
     var timeout;
+    var $rootScope;
 
     //Variables used for mock of data
     var dummyFileList;
@@ -102,7 +103,7 @@ describe('fileHandler specs', function() {
             }
         };
         module(function($provide) {
-            $provide.value('fileTransfer', fileTransferMock);
+            $provide.value('fileTransferService', fileTransferMock);
         });
     });
 
@@ -121,9 +122,10 @@ describe('fileHandler specs', function() {
     //Injects dependencies into mock variables
     beforeEach(function() {
         //Mock service and controller
-        inject(function($q, $timeout, ngCordovaFileDownloader) {
+        inject(function($q, _$rootScope_, $timeout, ngCordovaFileDownloader) {
             q = $q;
             timeout = $timeout;
+            $rootScope = _$rootScope_;
             ngCordovaFileDownloader.setSaveFolder(saveFolder);
             fileDownloadService = ngCordovaFileDownloader;
         });
@@ -154,7 +156,9 @@ describe('fileHandler specs', function() {
                 done();
             });
 
+            $rootScope.$digest();
             timeout.flush();
+
         });
 
         describe('File download failed',function(){

@@ -47,6 +47,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
 
 
-    grunt.registerTask('build', ['clean','concat','karma','ngmin','uglify']);
+    grunt.registerTask('build', ['clean','concat','ngmin','uglify']);
     grunt.registerTask('default', 'build');
 };
