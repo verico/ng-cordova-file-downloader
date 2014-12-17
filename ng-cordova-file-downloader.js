@@ -131,7 +131,6 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
                             ft.abort();
                             deferred.reject('Image download timeout : ' + url);
                         }, options.timeout);
-                        options.timeout = null;
                     }
 
                 }, deferred.reject);
