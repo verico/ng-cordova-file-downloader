@@ -21,8 +21,6 @@
 
                     var authHeader = {};
 
-                    var currentTimeout;
-
                     if(appSettings){
                         authHeader = {
                             "Authorization": appSettings.getLoginInfo()
@@ -55,11 +53,11 @@
 
 
                     if (options && options.timeout !== undefined && options.timeout !== null) {
-                        currentTimeout = $timeout(function () {
-                            console.log('Download timed out. Stppping filetransfer');
-                            ft.abort();
-                            deferred.reject('Image download timeout : ' + url);
-                        }, options.timeout);
+//                        currentTimeout = $timeout(function () {
+//                            console.log('Download timed out. Stppping filetransfer');
+//                            ft.abort();
+//                            deferred.reject('Image download timeout : ' + url);
+//                        }, options.timeout);
                     }
 
                 }, deferred.reject);
