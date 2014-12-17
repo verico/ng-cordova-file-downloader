@@ -47,9 +47,12 @@
                                 }
                                 deferred.resolve(fullPath);
 
-                            }, onError);
+                            }, function(err){
+                                onError(err);
+                                deferred.reject(err);
+                            });
                         });
-                    });
+                    },deferred.reject);
                 } else {
                     deferred.resolve(fullPath);
                 }

@@ -30,7 +30,6 @@
                 }
 
                 $q.allSettled(promises).then(done,done);
-
                 return deferred.promise;
             }
 
