@@ -51,7 +51,6 @@
                             ft.abort();
                             deferred.reject('Image download timeout : ' + url);
                         }, options.timeout);
-                        options.timeout = null;
                     }
 
                 }, deferred.reject);
