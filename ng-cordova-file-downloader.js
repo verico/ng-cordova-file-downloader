@@ -3,7 +3,7 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
+        service('fileDownloaderList', function($q,$timeout, fileDownloaderSingle) {
 
 
             function getNextPart(start, array) {
@@ -82,9 +82,17 @@ angular.module('com.verico.ng-cordova-file-downloader', []);
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('fileDownloaderSingle', function($q,$timeout, appSettings, fileTransferService, downloadFileSystemHelper, downloadFeedbackFactory) {
+        service('fileDownloaderSingle', function($q,$timeout,$injector, fileTransferService, downloadFileSystemHelper, downloadFeedbackFactory) {
 
             var setSaveFolderPath = downloadFileSystemHelper.setSaveFolderPath;
+
+            var appSettings;
+            try{
+                appSettings = $injector.get('appSettings');
+            }
+            catch(e){
+                //App settings not defined
+            }
 
 
             /*
@@ -267,7 +275,7 @@ angular.module('com.verico.ng-cordova-file-downloader')
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('downloadFileSystemHelper', function($q,$timeout, appSettings, fileTransferService,downloadFeedbackFactory) {
+        service('downloadFileSystemHelper', function($q,$timeout, fileTransferService,downloadFeedbackFactory) {
             var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
             var fullPath = null;
 

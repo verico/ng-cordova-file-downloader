@@ -2,7 +2,7 @@
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('fileDownloaderList', function($q,$timeout, appSettings,fileDownloaderSingle) {
+        service('fileDownloaderList', function($q,$timeout, fileDownloaderSingle) {
 
 
             function getNextPart(start, array) {

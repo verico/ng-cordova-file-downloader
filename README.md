@@ -13,7 +13,7 @@ Getting Started
 ---------------
 * Install with [Bower][bower]: `$ bower install ng-cordova-file-downloader`
 * Service requires cordova with file and file-transfer plugin installed.
-* Service requires injection of a service 'appSettings' with containing getLoginInfo() function(used for basic auth if needed).
+* Optional - Inject a service nameed 'appSettings' containing getLoginInfo() function(used for basic auth if needed). 
 
 
 

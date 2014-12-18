@@ -2,7 +2,7 @@
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('downloadFileSystemHelper', function($q,$timeout, appSettings, fileTransferService,downloadFeedbackFactory) {
+        service('downloadFileSystemHelper', function($q,$timeout, fileTransferService,downloadFeedbackFactory) {
             var IMAGE_SAVE_FOLDER = 'com.verico.file-default';
             var fullPath = null;
 

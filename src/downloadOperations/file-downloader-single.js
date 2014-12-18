@@ -2,9 +2,17 @@
     "use strict";
 
     angular.module('com.verico.ng-cordova-file-downloader').
-        service('fileDownloaderSingle', function($q,$timeout, appSettings, fileTransferService, downloadFileSystemHelper, downloadFeedbackFactory) {
+        service('fileDownloaderSingle', function($q,$timeout,$injector, fileTransferService, downloadFileSystemHelper, downloadFeedbackFactory) {
 
             var setSaveFolderPath = downloadFileSystemHelper.setSaveFolderPath;
+
+            var appSettings;
+            try{
+                appSettings = $injector.get('appSettings');
+            }
+            catch(e){
+                //App settings not defined
+            }
 
 
             /*
